@@ -3,7 +3,7 @@
   "description": "A simple package to send data to specific url .",
   "autoload": {
     "psr-4": {
-      "Celysium\\Validator\\": "src/"
+      "Celysium\\Informer\\": "src/"
     }
   },
   "authors": [
