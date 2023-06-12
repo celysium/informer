@@ -100,8 +100,8 @@ class InformerSync extends Command
                 return $namespace . str_replace(['/', '.php'], ['\\', ''], $model->getRelativePathname());
 
             })
-            ->filter(function ($model) {
-                return class_exists($model) && $this->isModel($model);
+            ->filter(function ($model) use ($except) {
+                return class_exists($model) && (!empty($except) && !in_array($model, $except)) && $this->isModel($model) && $this->isValidatable($model);
             })
             ->values();
     }
