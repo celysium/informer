@@ -12,6 +12,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 class InformerSync extends Command
 {
@@ -91,18 +92,18 @@ class InformerSync extends Command
             throw new InvalidArgumentException('The --models and --except options cannot be combined.');
         }
         $app_path = app_path();
-        $real_path = realpath($app_path) . DIRECTORY_SEPARATOR;
         $namespace = app()->getNamespace();
-        return collect((new Finder)->in($app_path)->files()->name('*.php'))
-            ->map(function ($model) use ($real_path, $namespace) {
 
-                return $namespace . str_replace(['/', '.php'], ['\\', ''], ltrim($model->getRealPath(), $real_path));
-            })->filter(function ($model) use ($except) {
-                return class_exists($model) &&
-                    (!empty($except) && !in_array($model, $except)) &&
-                    $this->isModel($model) &&
-                    $this->isValidatable($model);
-            })->values();
+        return collect((new Finder)->in($app_path)->files()->name('*.php'))
+            ->map(function (SplFileInfo $model) use ($namespace) {
+
+                return $namespace . str_replace(['/', '.php'], ['\\', ''], $model->getRelativePathname());
+
+            })
+            ->filter(function ($model) use ($except) {
+                return class_exists($model) && (!empty($except) && !in_array($model, $except)) && $this->isModel($model) && $this->isValidatable($model);
+            })
+            ->values();
     }
 
     /**
